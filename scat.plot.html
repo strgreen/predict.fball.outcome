@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Scat Plot 1</title>
+
+	<head>
+
+        <title>Testing Testing</title>
+        <script type="text/javascript" src="d3/d3.v3.js"></script>		
+
+   </head>
+   
+ <body>
+    <style>
+    
+    body {
+	background-color: rgb(52,53,55);
+	}
+    
+    .tick {
+		stroke: #ffffff;
+		fill: #ffffff;
+	}
+	
+	    .domain {
+		stroke: #ffffff;
+		fill: #ffffff;
+	}
+   
+    
+    </style>
+
+	<button type="button" onclick="updateData()"> Change Factors  </button>
+
+
+	<script type="text/javascript"></script> 
+	
+	<script>
+	
+	
+	
+
+   
+   var data = [
+	[ 0.651,  0.065, -0.027, './images/icon.yrds.svg'],
+	[ 0.595,  0.068,  0.013, './images/icon.fdwn.svg'],
+	[ 0.901, -0.228,  0.060, './images/icon.rush.yrds.svg'],
+	[ 0.721, -0.239,  0.646, './images/icon.rush.atmp.svg'],
+	[ 0.825, -0.234, -0.492, './images/icon.rush.avrg.svg'],
+	[ 0.108,  0.628, -0.050, './images/icon.pass.yrds.svg'],
+	[-0.064,  0.900, -0.097, './images/icon.pass.atmp.svg'],
+	[ 0.089,  0.937, -0.034, './images/icon.pass.comp.svg'],
+	[ 0.074,  0.034, -0.002, './images/icon.pass.avrg.svg'],
+	[-0.151,  0.229, -0.132, './images/icon.intr.svg'],
+	[-0.022, -0.025,  0.135, './images/icon.fmbl.svg']
+	]
+
+   
+    var margin = {top: 20, right: 15, bottom: 60, left: 60}
+      , width = 600 - margin.left - margin.right
+      , height = 300 - margin.top - margin.bottom;
+      
+      var x =d3.scale.linear()
+      	.domain([-.5,1.2])
+      	.range([1,width])
+      	
+      var y =d3.scale.linear()
+      	.domain([1.2,-1.0])
+      	.range([1,height]);
+
+    
+    
+    //var x = d3.scale.linear()
+    //          .domain([d3.min(data, function(d) { return d[0]; }), d3.max(data, function(d) { return d[0]; })])
+    //          .range([ d3.min(data, function(d) { return d[0]; }), width ]);
+    
+    //var y = d3.scale.linear()
+    //	      .domain([d3.min(data, function(d) { return d[1]; }), d3.max(data, function(d) { return d[1]; })])
+    //	      .range([ height, d3.max(data, function(d) { return d[1]; }) ]);
+ 
+ 
+    var chart = d3.select('body')
+	.append('svg:svg')
+	.attr('width', width + margin.right + margin.left)
+	.attr('height', height + margin.top + margin.bottom)
+	.attr('class', 'chart')
+	
+
+    var main = chart.append('g')
+	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+	.attr('width', width)
+	.attr('height', height)
+	.attr('class', 'main')   
+         
+    // make axis black     
+    main.append("rect")
+    	.attr('width',width)
+    	.attr('height', height)
+    	.style('fill', 'rgb(52,53,55)');   
+    	
+    
+    	
+        
+    // draw the x axis
+    var xAxis = d3.svg.axis()
+	.scale(x)
+	.ticks(8)
+	.orient('bottom');
+
+    main.append('g')
+	.attr('transform', 'translate(0,' + height + ')')
+	.attr('class', 'main axis date')
+	.call(xAxis);
+
+    // draw the y axis
+    var yAxis = d3.svg.axis()
+	.scale(y)
+	.ticks(5)
+	.orient('left');
+
+    main.append('g')
+	.attr('transform', 'translate(0,0)')
+	.attr('class', 'main axis date')
+	.call(yAxis);
+
+    var g = main.append("svg:g"); 
+    
+    g.selectAll("g")
+      .data(data)
+      .enter()
+      .append("svg:image") 
+      	  .attr("class", "dots")
+      	  .attr("xlink:href", function(d) { return d[3]})
+          .attr("x", 0 )
+          .attr("y", function (d) { return y(d[1]); } )
+          .attr("width",50)
+          .attr("height",48);
+
+	//Oragne Highlight box
+	main.append("rect")
+    	.attr('class','highbox1')
+    	.attr('width', 0)
+    	.attr('height', 85)
+    	.attr('x',0)
+    	.attr('y',0)
+    	.style('fill', 'none')   
+    	.style('stroke', 'rgb(225,90,30)')
+    	.style('stroke-width', '4'); 
+
+	//purple highlight box
+	main.append("rect")
+    	.attr('class','highbox2')
+    	.attr('width', 0)
+    	.attr('height', 85)
+    	.attr('x',330)
+    	.attr('y',110)
+    	.style('fill', 'none')   
+    	.style('stroke', 'rgb(180,100,255)')
+    	.style('stroke-width', '4'); 
+
+
+ 	var viewCount = 0;          
+
+	function updateData() {
+	
+		viewCount = viewCount + 1; 
+		
+		if (viewCount == 1) {
+		    g.selectAll(".dots")
+		      .data(data)
+		      .transition()
+		      .duration(1000)
+	          .attr("x", function (d) { return x(d[0]); } )
+	          .attr("y", function (d) { return y(d[1]); } )
+	          
+	      	main.selectAll(".highbox1")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 100)
+			 .attr('height', 85)
+           	 .attr('x',137)
+	    	 .attr('y',25)
+	    	 
+	      	main.selectAll(".highbox2")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 165)
+			 .attr('height', 85)
+           	 .attr('x',330)
+	    	 .attr('y',110)
+
+	    	 
+ 	
+		} else if (viewCount == 2) {
+		    g.selectAll(".dots")
+		      .data(data)
+		      .transition()
+		      .duration(1000)
+	          .attr("x", function (d) { return x(d[1]); } )
+	          .attr("y", function (d) { return y(d[2]); } )
+	          
+	          
+   	      	main.selectAll(".highbox1")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 170)
+			 .attr('height', 60)
+			 .attr('x',340)
+			 .attr('y',120)
+			 
+			main.selectAll(".highbox2")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 0)
+			 .attr('height', 0)
+           	 .attr('x',75)
+	    	 .attr('y',130)
+          
+
+		} else {
+			viewCount = 0;
+		    g.selectAll(".dots")
+		      .data(data)
+		      .transition()
+		      .duration(1000)
+	          .attr("x", function (d) { return x(d[0]); } )
+	          .attr("y", function (d) { return y(d[2]); } )
+	          
+	          
+   	      	main.selectAll(".highbox1")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 0)
+		  	 .attr('height', 0)
+		  	 .attr('x',140)
+		  	 .attr('y',100);
+		  	 
+		  	 
+ 	      	main.selectAll(".highbox2")
+			 .transition()
+			 .duration(1000)
+		  	 .attr('width', 175)
+			 .attr('height', 170)
+           	 .attr('x',330)
+	    	 .attr('y',50)
+
+
+ 
+		}	
+		
+	
+  			
+ 
+          };
+
+		
+       
+         
+</script>
+
+
+
+</body>
+
+</html>
