@@ -1,17 +1,33 @@
 package fbp;
 
-import play.Game;
+import java.io.IOException;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import play.Play;
-import play.Player;
 
 public class FBPmain {
 
-  public static void main(String[] args) {
-    System.out.println("I got here");
+  public static void main(String[] args) throws IOException {
     
-    Player player;
-    Play play;
-    Game game;
+    Play play = new Play();
+    String url = "http://www.espn.com/college-football/playbyplay?gameId=400869187";
+    
+    
+    Document doc = Jsoup.connect(url).get();
+    
+    Element test = doc.getElementById("gamepackage-play-by-play");
+    
+    Elements inputElements = test.getElementsByTag("li");  
+    for (Element inputElement : inputElements) {  
+        String key = inputElement.attr("name");  
+        String value = inputElement.attr("value");  
+        System.out.println("Param name: "+key+" \nParam value: "+value);  
+    }  
+    int testInt = 0;
   }
 
 }
