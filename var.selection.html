@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<script type="text/javascript" src="d3/d3.v3.js"></script>	
+<script type="text/javascript" src="functions/papaparse.min.js"></script>
+<title>Variable Selection</title>
+</head>
+<style>
+
+    body {
+	background-color: rgb(52,53,55);
+	}
+
+	.Pass_Container {
+	background-image:url('images/cont.pass.png');
+	width: 125px;
+	height: 350px;
+	text-align:center; 
+	}
+
+	.icon {
+	width: 100px;
+	height:100px;
+	margin-top:15px;
+	}
+
+.xLabel {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:26px;	
+	}
+
+.yLabel {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:26px;	
+	}
+
+
+.tick {
+		font-family:Arial, Helvetica, sans-serif;
+		stroke: #ffffff;
+		fill: #ffffff;
+	}
+
+.domain {	
+	fill: rgb(75,75,75);
+	stroke: rgb(75,75,75);
+	}
+
+
+
+.grid {
+ background-image:url('images/grid.back.png');
+}
+	
+div {	
+	width: 900px;
+	height: auto;
+}
+
+</style>
+
+<body>
+<div>
+
+
+<script type="text/javascript">
+ 
+
+//Load in the data for the RSS chart
+rss_data = [ [1, 128], [2, 109], [3, 101], [4,  95], [5,  92], [6,  89],  [7, 87], 
+		     [8,  85], [9,  83], [10, 82], [11, 81], [12, 80], [13, 78], [14, 77], 
+		     [15, 77], [16, 76], [17, 76], [18, 76], [19, 76], [20, 76] 
+		     ]
+
+grid_data = [ 
+	[2.25, .85, './images/icon.pass.atmp.svg'], 
+	[2.25, 1.75, './images/icon.pass.comp.svg'],
+	[2.25, 2.65, './images/icon.pass.avrg.svg'],
+	[5.20, 0.85, './images/icon.rush.atmp.svg'], 
+	[5.20, 1.75, './images/icon.rush.yrds.svg'],
+	[5.20, 2.65, './images/icon.rush.avrg.svg'], 
+	[8.10, 1.30, './images/icon.fmbl.svg'],
+	[8.10, 2.20, './images/icon.intr.svg'],
+	[11.0, 1.30, './images/icon.yrds.svg'],
+	[11.0, 2.20, './images/icon.fdwn.svg'],  
+	
+	[2.25, 4.90, './images/icon.pass.atmp.svg'], 
+	[2.25, 5.80, './images/icon.pass.comp.svg'],
+	[2.25, 6.65, './images/icon.pass.avrg.svg'],
+	[5.20, 4.90, './images/icon.rush.atmp.svg'], 
+	[5.20, 5.80, './images/icon.rush.yrds.svg'],
+	[5.20, 6.65, './images/icon.rush.avrg.svg'], 
+	[8.10, 5.35, './images/icon.fmbl.svg'],
+	[8.10, 6.25, './images/icon.intr.svg'],
+	[11.0, 5.35, './images/icon.yrds.svg'],
+	[11.0, 6.25, './images/icon.fdwn.svg'],  
+
+	];
+
+start_loc = [	
+	[2.25, 0.85], [2.25, 1.75],	[2.25, 2.65], [5.20, 0.85],	[5.20, 1.75], [5.20, 2.65], [8.10, 1.30],
+	[8.10, 2.20], [11.0, 1.30], [11.0, 2.20], [2.25, 4.90], [2.25, 5.80], [2.25, 6.65],	[5.20, 4.90], 
+	[5.20, 5.80], [5.20, 6.65],	[8.10, 5.35], [8.10, 6.25], [11.0, 5.35], [11.0, 6.25], 
+	];
+	
+
+rem_loc = [
+	[15.20, 0.75], 	[17.65, 0.75], 	[20.10, 0.75], 	[15.20, 1.70], 	[17.65, 1.70], 	[20.10, 1.70],  [15.20, 2.65], 
+	[17.65, 2.65], 	[20.10, 2.65],	[15.20, 3.60],	[17.65, 3.60],	[20.10, 3.60],	[15.20, 4.55],  [17.65, 4.55],  
+	[20.10, 4.55],  [15.20, 5.50], 	[17.65, 5.50], 	[20.10, 5.50],	[15.20, 6.45],	[17.65, 6.45], 	[20.10, 6.45],  
+	];
+
+//create an array containing location indices
+randArray = Array.apply(null, {length: 21}).map(Number.call, Number)
+
+
+
+function set_selected_terms_locations(termCount) {
+
+		var selected_terms = new Array();
+		var row = 0
+
+		//load in data indicating which variables to keep for each model
+		d3.csv("./data/sel.var.csv", function(data) {
+							
+			for (i = 0; i < data.length; i++) { 
+				
+			  //build a table indicating which varaibles should be kept for the specified model(TermCount)
+			  if ( data[i].TermCount == termCount) {
+					selected_terms[row] = Math.round(data[i].SelVars)
+	 			  	row = row + 1
+	 			  	
+  			  	} // end if then
+			} // end for loop 
+							
+		//change location to start location for selected variables
+		for (i = 0; i < selected_terms.length; i++) {
+				
+			grid_data[selected_terms[i]][0] = start_loc[selected_terms[i]][0]
+			grid_data[selected_terms[i]][1] = start_loc[selected_terms[i]][1]
+							
+		}
+
+		//Bind the data points with the new grid data (containing new locations) 
+		grid.selectAll(".dots")
+		.data(grid_data)
+		.transition()
+		.duration(1000)
+    	.attr("x", function (d) { return xGrid_Scale(d[0]); } )
+    	.attr("y", function (d) { return yGrid_Scale(d[1]); } )
+
+		})
+}
+
+function shuffle(array) {
+  var m = array.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
+};
+
+
+function get_new_locations() {
+
+	//Shuffle array indexing locations
+	randArray = shuffle(randArray)
+	new_locations = [];
+	
+	//loop through all locations
+	for (i = 0; i < 20; i++) {
+		//Assign new random location
+		grid_data[i][0] = rem_loc[randArray[i]][0]
+		grid_data[i][1] = rem_loc[randArray[i]][1]		
+	}
+}
+
+	//Axis dimensions
+	width = 800;
+	height =260; 
+	margin = 60;
+
+
+//build scales
+   xScale = d3.scale.linear()
+   	  .domain([1 , d3.max(rss_data, function(d) { return d[0]; })])
+      .range([0 +margin,width - margin]);
+
+   yScale = d3.scale.linear()
+   	  .domain([d3.min(rss_data, function(d) { return d[1]; }), d3.max(rss_data, function(d) { return d[1]; })])
+      .range([height-margin, 0 + margin]);
+
+
+//Build chart
+
+	//build background
+    var chart = d3.select('div')
+	.append('svg:svg')
+	.attr('width', width + margin)
+	.attr('height', height + margin)
+	.attr('class', 'chart');
+	
+	//create plotting axis
+    var axis = chart.append('g')
+	.attr('transform', 'translate(' + (margin/2 + 20) + ',' + margin/2 + ')')
+	.attr('width', width - margin)
+	.attr('height', height - (margin-20))
+	.attr('class', 'axis');
+
+	//Make axis black
+	axis.append("rect")
+	.attr('width',width)
+	.attr('height',height)
+	.attr('stroke',"white")
+	.attr('stroke-width',8)
+	.style('fill', 'rgb(75,75,75)'	);   
+
+
+    // create the x axis labels
+    var xLabels = d3.svg.axis()
+	.scale(xScale)
+	.ticks(20)
+	.orient('bottom');
+	
+    axis.append('g')
+	.attr('transform', 'translate(0,' + (height-30) + ')')
+	.attr('class', 'x axis')
+	.call(xLabels);
+
+    // create the Y axis labels
+    var yLabels = d3.svg.axis()
+	.scale(yScale)
+	.ticks(6)
+	.orient('left');
+	
+    axis.append('g')
+	.attr('transform', 'translate(' + 40 + ',0)')
+	.attr('class', 'Y axis')
+	.call(yLabels);
+    
+    //plot the points
+    axis.selectAll("axis")
+      .data(rss_data)
+      .enter()
+      .append("circle") 
+      .attr("class", "points")
+      .attr("fill","white")
+      .attr("model_index", function(d,i) {return i; })
+      .attr("cx", function (d) { return( xScale(d[0])); } )
+      .attr("cy", function (d) { return( yScale(d[1])); } )
+      .attr("r", 10);
+            
+     //axis labels
+	chart.append("text")
+    .attr("class", "xLabel")
+    .attr("text-anchor", "middle")
+    .attr("x", width/2)
+    .attr("y", height+60)
+    .attr("fill","white")
+    .text("Amount of Terms in Model");     
+
+	chart.append("text")
+    .attr("class", "yLabel")
+    .attr("text-anchor", "middle")
+    .attr("transform", "translate(40,160), rotate(270)")
+    .attr("fill","white")
+    .text("Model Error (RSS)");     
+
+//build grid
+
+	grid_width = 900;
+	grid_height = 658;
+
+	//build y scale
+   	yGrid_Scale = d3.scale.linear()
+   .domain([0, 8])
+   .range([0,grid_height]);
+
+	//build x scale
+	xGrid_Scale = d3.scale.linear()
+   	.domain([0,24])
+    .range([0,grid_width]);
+
+	//build grid svg
+    var grid = d3.select('div')
+	.append('svg:svg')
+	.attr('width', grid_width)
+	.attr('height', grid_height)
+	.attr('class', 'grid');
+
+    //plot the icons
+    grid.selectAll("grid")
+      .data(grid_data)
+      .enter()
+      .append("svg:image") 
+      .attr("class", "dots") 
+      .attr("x", function (d) { return xGrid_Scale(d[0]); } )
+      .attr("y", function (d) { return yGrid_Scale(d[1]); } )
+      .attr("xlink:href", function(d) { return d[2]}) 
+      .attr("dot_index", function(d,i) {return i; })
+      .attr("width",80)
+      .attr("height",80);
+
+	//Mouseover
+	chart.selectAll(".points")
+	.on("mouseover", function(d) {
+
+		d3.select(this).attr("fill","orange")
+		d3.select(this).attr("stroke","gray")
+		d3.select(this).attr("stroke-width",5)
+		d3.select(this).attr("r",15)
+		
+		var modelCount = d3.select(this).attr("model_index");
+ 
+		//correct index because it starts at zero
+		modelCount = Math.round(modelCount) + 1;
+
+		get_new_locations()	
+		set_selected_terms_locations(modelCount)
+		
+	}); //end mouseover
+	
+	
+	
+	chart.selectAll(".points")
+	.on("mouseout", function() {
+		
+		d3.select(this).attr("fill","white")
+		d3.select(this).attr("stroke-width",0)
+		d3.select(this).attr("r",10)
+		
+		//loop through requested locations		
+		for (i = 0; i < start_loc.length; i++) {
+		
+		//Assign icon to its start location
+		grid_data[i][0] = start_loc[i][0]
+		grid_data[i][1] = start_loc[i][1]	
+    
+		}
+
+	grid.selectAll(".dots")
+	.data(grid_data)
+	.transition()
+	.duration(1000)
+    .attr("x", function (d) { return xGrid_Scale(d[0]); } )
+    .attr("y", function (d) { return yGrid_Scale(d[1]); } )
+		
+	}); //end mouseover
+
+
+</script>
+
+
+
+</div>
+</body>
+</html>
