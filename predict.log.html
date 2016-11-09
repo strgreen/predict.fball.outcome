@@ -1,0 +1,686 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+		<title>Predicting with Logistic Model</title>
+		<script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>	
+		<script type="text/javascript" src="./jQuery/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="./jquery_v1.12.1/jquery-ui.js"></script>
+		<link   rel="stylesheet" type="text/css" href="./jquery_v1.12.1/jquery-ui.css" ></link>
+	</head>
+
+	<style> 	    body {
+	background-color: rgb(52,53,55);
+	}
+
+
+	#main_content{
+		margin:auto;
+	}
+
+	#wrap {
+		margin:auto;	
+	}
+
+
+	div.ExplainBox {
+		height: 100px;
+		width:700px;
+		margin:auto;
+	}
+
+	.explanation_text{
+		color: white;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:20px;
+		text-align:justify;
+	}
+
+	div#wrap {
+		margin:auto;
+	}
+
+	h1{
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:35px;
+		color:white;
+		margin-top:20px;
+	}
+
+	#slider_container {
+	float:left;
+	width:200px;
+	height:500px;
+	background-color:rgb(52,53,55);
+	}
+
+	#slider_icon_container {
+	float:left;
+	width:155px;
+	height:500px;
+	background-image:url('./images/log.predict.map.icon.back.png')
+	}
+
+	#slider {
+	float:left;
+	height: 424px;
+	vertical-align:middle;
+	margin-top:30px;
+	}
+
+	.chart {
+	margin:50px;
+	
+	}
+	
+	#predict_map {
+	float:left;
+	width:477px;
+	height:500px;	
+	background-image:url('./images/log.predict.map.back.png');
+	}
+
+	#plot_container {
+	float:left;
+	width:600px;
+	height:500px;
+	margin-left:50px;	
+	margin-bottom:50px;
+	}
+
+	#probability_container {
+	float:left;
+	width:600px;
+	height:125px;
+	}
+
+	#box_probHome {
+	float:left;
+	width:210px;
+	height:125px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-image:url('./images/log.predict.home.prob.box.png');
+    }
+
+	#caption_probHome {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size: 45px;
+	font-weight: bold;
+	color:white;	
+	margin-top: 35px;
+	}
+
+	#box_probVist {
+	float:right;
+	width:210px;
+	height:125px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-image:url('./images/log.predict.vist.prob.box.png');
+    }
+
+	#caption_probVist {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size: 45px;
+	font-weight: bold;
+	color:white;	
+	margin-top: 35px;
+	}
+
+	#predict_plot {
+	float:left;
+	width:600px;
+	height:250px;
+	margin-top:10px;
+	}	
+
+	.yScale {
+		fill:white;
+		stroke:white;
+	}
+
+	.tick {
+		font-family:Arial, Helvetica, sans-serif;
+		font-size: 16px;
+		stroke: white;
+		fill: white;
+	}
+
+	.domain {	
+	stroke: white;
+	}
+
+
+	#estimate_container {
+	float:left;
+	width:560px;
+	height:82px;
+	margin-top:15px;	
+	margin-left: 40px;
+	background-image:
+	}
+
+	.caption_box {
+	float:left;
+	width:93px;
+	height:50px;
+	background-image:url('./images/log.predict.caption.box.png');
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	}
+
+	.caption {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	color:white;	
+	margin: 0;
+	}
+	
+#yrds_box {
+	margin-left:46px;
+}
+
+
+	</style>
+
+		
+
+
+	<body>
+
+
+		<div class ="ExplainBox">
+			<h1> Predicting with Logistic Regression</h1>
+		
+				<p class ="explanation_text">This visualization shows how different features predict the outcome of a football game.</p> 
+				
+		</div> <!--Explain Box-->
+
+
+
+		<div id="main_content">
+			<div id="wrap">
+		
+				<div id= "slider_container">
+
+					<div id="slider_icon_container"></div>
+					
+					<div id ="slider"></div>		
+				</div> <!--slider container-->
+					
+				<div id="predict_map"></div> <!--predict map-->	
+				
+				<div id="plot_container">	
+
+					<div id="probability_container">
+						
+							<div id="box_probHome">  <p id="caption_probHome"> --- </p>  </div>
+							<div id="box_probVist">  <p id="caption_probVist"> --- </p>  </div>
+							
+					</div> <!--probability plot-->
+				
+					<div id="predict_plot">   </div> <!--predict plot-->
+					
+						<div id="estimate_container">
+					
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							
+							<!-- this element must be shifted further left so it has its own css style-->
+							<div class="caption_box" id="yrds_box"> <p class="caption"> --- </p>  </div>
+							
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+							<div class="caption_box"> <p class="caption"> --- </p>  </div>
+
+				
+						</div> <!--caption container-->	
+				
+				</div> <!--plot container-->
+				
+				<div class ="ExplainBox">
+					<p class ="explanation_text">On the left side, there is a probability map which reflects whether the home or guest team will win the game. The more light-brown a part of the map is, the higher the likelihood that home team will win. The more teal the likelier the guest team will win. </p> 
+					<p class ="explanation_text">Using the slider bar, you can select which football feature is displayed on the map. For example, if you selected the feature - total yards - than as you move towards the right of the map, total yards for the home team will increase. Similarly, as you move up the map, total yards for the guest team increases. </p> 
+					<p class ="explanation_text">The plot on the right side shows the probability of a home team victory for each feature. As you move the cursor over the probability maps these values will move up and down reflecting changes in the probability of the home team winning. Below the plot you can see the difference in estimate between the home and guest team for each feature. For example, under the total yards icon, a positive 200 means the home team earned 200 more yards than guest team. A negative value indicates that the guest team earned more yards than the home team. </p> 
+				<div> <!--explain box-->
+			
+			</div><!--wrap content-->
+		</div> <!--main content-->
+
+
+		<script type="text/javascript">	
+
+
+   var icon_paths = [   
+   './images/icon.mean.svg',   
+   './images/icon.yrds.svg',
+   './images/icon.fdwn.svg',
+   './images/icon.intr.svg',
+   './images/icon.fmbl.svg',
+   './images/icon.pass.atmp.svg',
+   './images/icon.pass.comp.svg',
+   './images/icon.pass.yrds.svg',
+   './images/icon.rush.atmp.svg',
+   './images/icon.rush.yrds.svg',
+   './images/icon.rush.avrg.svg',
+	]
+	
+	//Change caption locations to reflec tht way it looks in gui (I staggared it)
+	caption_location = [6, 1, 7, 2, 8, 3, 9, 4, 10, 5]
+	
+	coeff = [-0.0084,  0.0095,  0.2383,  -0.2115, -0.526, 
+			  0.5941, -0.375,   0.2948,  -0.0256,  0.0419, 
+			 -1.4416,  1.4291,  0.054,   -0.105,   0.0081,  
+			  0.0742,  0.008,  -0.0179,   0.1065, -0.0576]
+
+	inter = -2.3168
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Functions
+
+		var slice = 1
+
+		function get_slice_data(cube_data, slice) {
+    		var slice_data = []
+
+    		//Get data for the slice
+    		for (i = 0; i < cube_data.length; i++) { 
+    			if (cube_data[i][2] == slice) {
+   			 		slice_data.push(cube_data[i])
+   				 }
+    		}
+
+		return slice_data
+
+    	}		
+		
+		function get_plot_data(cube_data, xCoord, yCoord) {
+		
+			var plot_data = []
+			
+			//Get plot data across all slices
+			for (i = 0; i < cube_data.length; i++) {
+			
+				if (cube_data[i][0] == xCoord && cube_data[i][1] == yCoord) {
+					plot_data.push( cube_data[i] )
+				}
+			
+			}
+			
+			//add icon path 
+			for (i = 0; i < plot_data.length; i++) {
+				plot_data[i][4] = icon_paths[plot_data[i][2]-1] 
+			}
+			
+		return plot_data
+		
+		}
+		
+		function update_map(map_data) {
+
+			color = d3.scaleLinear()
+			.domain([d3.min(map_data, function(d) { return d[3]; }), d3.max(map_data, function(d) { return d[3]; })])
+			.range([d3.rgb(230,220,154), d3.rgb(105,161,152)]);
+		
+			d3.selectAll(".panels")				
+			.data(map_data)
+			.transition()
+			.duration(250)
+			.delay(function(d,i) {return Math.random() * 500; })
+			.attr('height',0)
+			.attr("y", function(d) {return ( ( (d[1]-1)  *  panel_height  ) + panel_height/2  ) })
+	   		.transition()
+			.attr('height',panel_height)
+			.attr("y", function(d) {return ((  (26-d[1])   -1) * panel_height) })
+			.attr("fill", function(d) {return color(d[3]); }  ) 		
+		}
+				
+		function update_plot(plot_data) {
+
+			//plot points		
+			d3.selectAll(".points")
+			.data(plot_data)
+			.transition()
+			.duration(250)
+	   		.attr("y", function(d) {return ( yScale(d[3]) )})
+		
+		}
+		
+		function update_captions(xCoord, yCoord) {
+		
+		   var estimates = []; 
+		
+			d3.text("data/log.predict.estimates.csv", function(text) {
+			  var data = d3.csvParseRows(text).map(function(row) {
+			    return row.map(function(value) {
+			      return +value;
+			      });
+				});
+			
+				est_data = data
+										
+				//Get estimates for each feature using the supplied x and y coordinates
+				for (slice = 1; slice < slice_dim; slice++) {
+							
+					for (i = 0; i < est_data.length; i++) {
+						
+						if (est_data[i][0] == xCoord && est_data[i][1] == yCoord && est_data[i][2] == slice) {
+						 diff = (est_data[i][3] - est_data[i][4]) 
+						 diff = Math.round(diff * 100) / 100
+						 
+		 				document.getElementsByClassName("caption").item(caption_location[slice-1]).innerHTML = diff ;
+						
+						//Collect estimates to compute probability
+						estimates.push(est_data[i][3])
+						estimates.push(est_data[i][4])					 
+				
+						}					
+					}
+				}
+				
+			//Execute function to computer probability
+			compute_probability(estimates)
+			
+			});					
+			
+			
+		}
+		
+		function compute_probability(estimates) {
+			
+			//compute probability
+			
+				//start with intercept
+				sum = inter;
+			
+				for (i = 0; i < estimates.length; i++) {
+			 		sum = sum + (estimates[i] * coeff[i])
+			 	 }
+			
+			
+			
+			odds_value = Math.exp(sum)
+			probability = odds_value / (1 + odds_value)
+	 		probability = 1-probability
+			probability = (Math.round( probability * 100) /100) * 100
+			
+			probability = parseFloat(Math.round(probability * 100) / 100).toFixed(0);
+			
+			document.getElementById("caption_probHome").innerHTML = probability + "%" 
+			document.getElementById("caption_probVist").innerHTML = Math.abs( probability -100 ) + "%"
+		}
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Initialize the figures
+		
+	
+		d3.text("data/log.predict.csv", function(text) {
+			  var data = d3.csvParseRows(text).map(function(row) {
+			    return row.map(function(value) {
+			      return +value;
+			    });
+			  });
+		
+	    
+	    cube_data = data;
+	    map_data = get_slice_data(cube_data,1)
+	    plot_data = get_plot_data(cube_data,1,1)
+		
+		x_dim = Math.max.apply(Math, map_data.map(function(v) {
+		  return v[0];
+		}));
+	
+		y_dim = Math.max.apply(Math, map_data.map(function(v) {
+		  return v[1];
+		}));
+		
+		slice_dim = Math.max.apply(Math, cube_data.map(function(v) {
+		  return v[2];
+		}));
+
+		update_captions(1,1)
+		
+		//Function to create slide and track value
+			$('#slider').slider({
+				orientation: 'vertical',
+				max: slice_dim,
+				min: 1,
+				change: function(event,ui) {
+				slice=$('#slider').slider("value");
+				map_data = get_slice_data(cube_data,slice)				
+				update_map(map_data);
+				}
+			});
+		
+		
+	
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Build Map Axis
+
+		width  = 375
+		height = 375
+		margin = 10
+
+		
+			//determine size of panel accounting for amount of panels and insuring full coverage of axis
+			panel_width = Math.round((width-margin)/x_dim) -1
+			panel_height= Math.round((height-margin)/y_dim) -1
+		
+				//.domain([d3.min(map_data, function(d) { return d[3]; }), d3.max(map_data, function(d) { return d[3]; })])
+		
+			color = d3.scaleLinear()
+			.domain([0,1])
+			.range([d3.rgb(230,220,154), d3.rgb(105,161,152)]);
+
+			//build background	
+	    	var chart = d3.select('#predict_map')
+			.append('svg:svg')
+			.attr('width', width + margin)
+			.attr('height', height + margin)
+			.attr('class', 'chart');
+		
+			//Make axis black
+			chart.append("rect")
+			.attr('width',width)
+			.attr('height',height)
+			.attr('stroke',"white")
+			.attr('stroke-width',8) 
+			.style('fill', 'rgb(52,53,55)'	);   
+	
+			//create plotting axis
+	    	var axis_map = chart.append('g')
+			.attr('transform', 'translate(' + (margin/2 ) + ',' + margin/2 + ')')
+			.attr('width', width - margin)
+			.attr('height', height - margin)
+			.attr('class', 'axis_map');
+		
+			axis_map.selectAll("axis_map")
+			.data(map_data)
+			.enter()
+			.append("rect")
+			.attr("class","panels")
+			.attr("width",panel_width)
+			.attr("height",panel_height)
+			.attr('transform', 'translate(8,6)')
+			.attr('xCoord', function(d) {return d[0] })  //Crerate new fields for x and y coord (used in hover effects)
+			.attr('yCoord', function(d) {return d[1] })  //Create new fields for x and y coord (used in hover effects)
+	   		.attr("x", function(d) {return ((      d[0]    -1) * panel_width) })
+			.attr("y", function(d) {return ((  (26-d[1])   -1) * panel_height) })
+			.attr("fill", function(d) {return color(d[3]); }  );; 
+
+ 
+				
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Build Plot Axis
+
+			//Determine size of plots
+			width_plot = 600
+			height_plot = 250
+			margin_plot = 50
+			
+			//build scales
+   			xScale = d3.scaleLinear()
+   	  		.domain([1 , d3.max(plot_data, function(d) { return d[2]; })])
+      		.range([45 , width_plot-80  ]);
+
+   			yScale = d3.scaleLinear()
+      		.domain([0,1])
+      		.range([height_plot-75,0]);
+
+			//build background	
+	    	var chart_plot = d3.select('#predict_plot')
+			.append('svg:svg')
+			.attr('width', width_plot)
+			.attr('height', height_plot)
+			.attr('class', 'chart_plot');
+		
+			chart_plot.append("rect")			
+			.attr('width',  width_plot)
+			.attr('height', height_plot)
+			.attr('fill', 'rgb(52,53,55)')
+			.attr('stroke', 'white')
+			.attr('stroke-width',8)
+	
+			//create plotting axis
+	    	var axis_plot = chart_plot.append('g')
+			.attr('class', 'axis_plot');			
+				
+			//plot points		
+			axis_plot.selectAll("axis_plot")
+			.data(plot_data)
+			.enter()
+			.append("svg:image")
+			.attr("class","points")
+			.attr("x", function(d) {return ( xScale(d[2]) )})
+	   		.attr("y", function(d) {return ( yScale(d[3]) )})
+            .attr("xlink:href", function(d) { return d[4]})
+	   		.attr("width",75)
+		   	.attr("height",73)
+		   	
+		   	// create the a yxis labels
+		    chart_plot.append("g")
+		    .attr("class", "yScale")
+	    	.attr('transform', 'translate(40,37)')
+    	  	.call(d3.axisLeft(yScale).ticks(5));
+
+	   		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//User interaction effects
+
+			///////////////////////////////
+			//Hover Effects
+			
+			//panel selected
+			d3.selectAll(".panels")
+			.on("mouseover", function(d) {
+
+				//get variables needed for producing a selector		
+				var xPos = parseFloat(d3.select(this).attr("x"));
+				var yPos = parseFloat(d3.select(this).attr("y")); 
+				var xCoord = parseFloat(d3.select(this).attr("xCoord")) ;
+				var yCoord = parseFloat(d3.select(this).attr("yCoord")) ;
+						
+				plot_data = get_plot_data(cube_data,xCoord,yCoord)
+				update_plot(plot_data)
+				update_captions(xCoord,yCoord)
+						
+				//append an rect to highligther (to create a highlight box for selector)
+				d3.select(".axis_map")
+				.append("rect")
+				.attr("x", xPos)
+				.attr("y", yPos)
+				.attr("width",panel_width)
+				.attr("height",panel_height)
+				.attr('transform', 'translate(8,6)')
+				.attr("stroke","white")
+				.attr("stroke-width",3)
+				.attr("fill","none")
+				.attr("class","panel_highlighter")
+				
+				d3.selectAll(".panel_highlighter")
+				.on("mouseout", function() {
+			
+					d3.selectAll(".panel_highlighter")
+					.remove();
+						
+				});
+				
+				d3.selectAll
+			
+			});
+			
+			
+			
+			//Leave element being hovered over
+			//d3.selectAll(".panels")
+			//.on("mouseout", function() {
+			
+			//	d3.selectAll(".panel_highlighter")			
+			//	.remove();
+
+			//});
+
+
+			///////////////////////////////
+			//Click Effects
+			
+			//panel selected
+			//axis.selectAll(".panels")
+			//.on("mousedrag", function(d) {
+			
+				//remvove previous selection
+				//d3.select(".selector")			
+				//.remove();
+
+				//get variables needed for producing a selector		
+			//	var xPos = parseFloat(d3.select(this).attr("x"));
+			//	var yPos = parseFloat(d3.select(this).attr("y")); 
+			//	var xCoord = parseFloat(d3.select(this).attr("xCoord")) ;
+			//	var yCoord = parseFloat(d3.select(this).attr("yCoord")) ;
+							
+			//	plot_data = get_plot_data(cube_data,xCoord,yCoord)
+			//	update_plot(plot_data)
+			
+			//	//create the selector (svg group)
+			//	panel_selector = axis.append("g")			
+			//	.attr("class", "selector")	
+
+			//	//append an rect to the selector (to create a highlight box for selector)
+			//	panel_selector.append("rect")
+			//	.attr("x", xPos)
+			//	.attr("y", yPos)
+			//	.attr("width",panel_width)
+			//	.attr("height",panel_height)
+			//	.attr('transform', 'translate(8,6)')
+			//	.attr("fill","silver")
+			//	.attr("stroke","white")
+			//	.attr("stroke-width",3)
+			//	.attr("class","panel_selector") 		
+			
+			//});
+
+
+		});
+	
+
+		</script>
+
+
+
+
+
+	</body>
+
+</html>
